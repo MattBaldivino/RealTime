@@ -1,6 +1,7 @@
 package com.bignerdranch.android.realtime
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,12 +37,16 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.bignerdranch.android.realtime.ui.theme.RealTimeTheme
+import database.AppDatabase
+import kotlinx.coroutines.launch
+import java.util.Date
 import com.bignerdranch.android.realtime.LoginScreen as LoginScreen
 
 class MainActivity : ComponentActivity() {
@@ -58,6 +63,38 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        //INSERTING DUMMY DATA TO ALLOW FOR FUTURE TESTING/IMPLEMENTATION
+        //PLEASE DELETE WHEN FINISHED
+        //PROPER IMPLEMENTATION WILL LIKELY HAVE TO BE DONE USING A VIEW MODEL AND/OR COROUTINES
+        val database by lazy { AppDatabase.getDatabase(this) }
+        val userRepository by lazy { UsersRepository(database.usersDao()) }
+        val postRepository by lazy { PostsRepository(database.postsDao())}
+
+        val user = Users(
+            username = "JaneDoe",
+            password = "1234"
+        )
+
+        val dummyDate = Date()
+        val post = Posts(
+            //dummyphoto doesn't exist, it's just a string placeholder
+            photoFileName = "dummyphoto.png",
+            date = dummyDate,
+            owner = "JaneDoe"
+        )
+
+        lifecycleScope.launch {
+            userRepository.insertUser(user)
+            val returnedUser: Users = userRepository.getUser("JaneDoe")
+            Log.d("user", returnedUser.toString())
+
+            postRepository.insertPost(post)
+            val returnedPosts = postRepository.getPosts(dummyDate)
+            Log.d("post", returnedPosts.joinToString())
+
+        }
+
     }
 }
 
@@ -133,3 +170,5 @@ fun NavGraph(navController: NavHostController){
     }
 
 }
+
+
