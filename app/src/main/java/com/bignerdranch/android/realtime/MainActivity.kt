@@ -1,11 +1,14 @@
 package com.bignerdranch.android.realtime
 
+import android.content.pm.PackageManager
+import android.Manifest;
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,10 +22,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,18 +31,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.bignerdranch.android.realtime.composables.CameraPreviewScreen
 import com.bignerdranch.android.realtime.ui.theme.RealTimeTheme
 import database.AppDatabase
 import kotlinx.coroutines.launch
@@ -50,9 +49,32 @@ import java.util.Date
 import com.bignerdranch.android.realtime.LoginScreen as LoginScreen
 
 class MainActivity : ComponentActivity() {
+
+    private val cameraPermissionRequest =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                // setCameraPreview()
+            } else {
+                // Camera permission denied
+            }
+
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        when (PackageManager.PERMISSION_GRANTED) {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) -> {
+                // setCameraPreview()
+            }
+            else -> {
+                cameraPermissionRequest.launch(Manifest.permission.CAMERA)
+            }
+        }
+
         setContent {
             RealTimeTheme {
                 Box(
@@ -96,6 +118,12 @@ class MainActivity : ComponentActivity() {
         }
 
     }
+
+//    private fun setCameraPreview() {
+//        setContent {
+//            CameraPreviewScreen()
+//        }
+//    }
 }
 
 @Composable
@@ -153,6 +181,7 @@ private fun authenticate(username: String, password: String): Boolean {
     return (username == validUsername) && (password == validPassword)
 }
 
+
 @Composable
 fun NavGraph(navController: NavHostController){
     NavHost(navController = navController, startDestination = "login"){
@@ -165,10 +194,16 @@ fun NavGraph(navController: NavHostController){
         }
 
         composable("home"){
-            HomeScreen()
+            HomeScreen(navController)
+        }
+
+        composable("camera") {
+            CameraPreviewScreen(navController)
         }
     }
 
 }
+
+
 
 
