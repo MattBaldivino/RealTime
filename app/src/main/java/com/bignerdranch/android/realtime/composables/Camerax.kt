@@ -12,6 +12,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -28,7 +30,9 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 @Composable
+
 fun CameraPreviewScreen(navController: NavHostController) {
+
     val lensFacing = CameraSelector.LENS_FACING_BACK
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -48,13 +52,23 @@ fun CameraPreviewScreen(navController: NavHostController) {
     }
     Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
         AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
-        Button(onClick = { captureImage(imageCapture, context) }) {
+
+        // Capture image button
+        Button(
+            onClick = { captureImage(imageCapture, context) },
+            modifier = Modifier.padding(bottom = 80.dp)
+        ) {
             Text(text = "Capture Image")
         }
-        Button(onClick = {
-            navController.navigate("camera") // Navigate to the Camera Screen
-        }) {
-            Text(text = "Open Camera")
+
+        // Second button for returning to home page
+        Button(
+            onClick = {
+                navController.navigate("home") // Navigate to the Camera Screen
+            },
+            modifier = Modifier.padding(bottom = 40.dp) // Add padding to position below the first button
+        ) {
+            Text(text = "Home")
         }
     }
 }
