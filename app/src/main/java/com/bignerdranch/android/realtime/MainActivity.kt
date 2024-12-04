@@ -62,7 +62,6 @@ import android.content.BroadcastReceiver
 import androidx.core.app.NotificationCompat
 
 class MainActivity : ComponentActivity() {
-
     private val cameraPermissionRequest =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
@@ -178,7 +177,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit){
     var username by remember {mutableStateOf("")}
-    var password by remember {mutableStateOf("")}
     val context = LocalContext.current.applicationContext
 
     Column(modifier = Modifier
@@ -198,23 +196,12 @@ fun LoginScreen(onLoginSuccess: () -> Unit){
                 .padding(bottom = 8.dp)
         )
 
-        OutlinedTextField(value = password, onValueChange = {password = it},
-            label = {Text(text = "Password")},
-            shape = RoundedCornerShape(20.dp),
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Lock, contentDescription = "Password")
-            },
-            modifier = Modifier.fillMaxWidth()
-                .padding(bottom = 8.dp),
-            visualTransformation = PasswordVisualTransformation()
-        )
-
         Button(onClick = {
-            if(authenticate(username, password)){
+            if(authenticate(username)){
                 onLoginSuccess()
-                Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT)
+                Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
             }else{
-                Toast.makeText(context, "Incorrect username and/or password", Toast.LENGTH_SHORT)
+                Toast.makeText(context, "Incorrect username and/or password", Toast.LENGTH_SHORT).show()
             }
         }, contentPadding = PaddingValues(start = 60.dp, end = 60.dp, top = 8.dp, bottom = 8.dp),
             modifier = Modifier.padding(top = 18.dp)
@@ -224,10 +211,28 @@ fun LoginScreen(onLoginSuccess: () -> Unit){
     }
 }
 
-private fun authenticate(username: String, password: String): Boolean {
-    val validUsername = "TestUser"
-    val validPassword = ":3"
-    return (username == validUsername) && (password == validPassword)
+private fun authenticate(username: String): Boolean {
+    //val validUsername = "TestUser"
+    //return (username == validUsername)
+    return true
+
+    /*
+    val database by lazy { AppDatabase.getDatabase(this) }
+    val userRepository by lazy { UsersRepository(database.usersDao()) }
+    val returnedUser: Users = userRepository.getUser(username)
+    if (returnedUser != null) {
+        Log.d("user", returnedUser.toString())
+        return true
+    } else {
+        val user = Users(
+            username = username,
+            password = "1234"
+        )
+        userRepository.insertUser(user)
+        Log.d("created", "User created")
+        return true
+    }
+    */
 }
 
 @Composable
