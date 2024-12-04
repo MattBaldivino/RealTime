@@ -2,6 +2,7 @@ package com.bignerdranch.android.realtime
 
 import android.content.pm.PackageManager
 import android.Manifest;
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -47,6 +48,18 @@ import database.AppDatabase
 import kotlinx.coroutines.launch
 import java.util.Date
 import com.bignerdranch.android.realtime.LoginScreen as LoginScreen
+import android.os.Build
+import androidx.core.app.ActivityCompat
+import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.content.Context
+import android.content.Intent
+import java.util.Calendar
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
+
+import androidx.core.app.NotificationCompat
 
 class MainActivity : ComponentActivity() {
 
@@ -60,8 +73,31 @@ class MainActivity : ComponentActivity() {
 
         }
 
+    @SuppressLint("ScheduleExactAlarm")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        createNotificationChannel()
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 18) // SET STATIC TIME HERE in military hours
+            set(Calendar.MINUTE, 28)
+            set(Calendar.SECOND, 0)
+        }
+
+        val intent = Intent(this, NotificationReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
+        )
+
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            pendingIntent
+        )
         enableEdgeToEdge()
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
@@ -119,6 +155,19 @@ class MainActivity : ComponentActivity() {
 
     }
 
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Notification Channel Name"
+            val descriptionText = "Channel Description"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel("channel_id", name, importance).apply {
+                description = descriptionText
+            }
+
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
 //    private fun setCameraPreview() {
 //        setContent {
 //            CameraPreviewScreen()
@@ -181,7 +230,6 @@ private fun authenticate(username: String, password: String): Boolean {
     return (username == validUsername) && (password == validPassword)
 }
 
-
 @Composable
 fun NavGraph(navController: NavHostController){
     NavHost(navController = navController, startDestination = "login"){
@@ -201,8 +249,8 @@ fun NavGraph(navController: NavHostController){
             CameraPreviewScreen(navController)
         }
     }
-
 }
+
 
 
 
