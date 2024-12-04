@@ -9,5 +9,6 @@ data class Posts (
     val id:Long=0,
     val photoFileName: String? = null,
     val date: Date,
-    val owner: String? = null
+    val owner: String? = null,
+    val image: ByteArray? = null
 )

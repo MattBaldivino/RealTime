@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -26,6 +27,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
+import com.bignerdranch.android.realtime.Posts
+import database.AppDatabase
+import java.util.Date
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -94,7 +98,33 @@ private fun captureImage(imageCapture: ImageCapture, context: Context) {
         ContextCompat.getMainExecutor(context),
         object : ImageCapture.OnImageSavedCallback {
             override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                println("Successs")
+                println("Success")
+                val uri = outputFileResults.savedUri
+                println("Image saved at: $uri")
+
+                val imageByteArray = context.contentResolver.openInputStream(uri!!)?.use { it.readBytes() }
+
+                // Save image data to database (Assuming you're saving it in Posts table)
+                val appDatabase = AppDatabase.getDatabase(context)
+                val postsDao = appDatabase.postsDao()
+
+                // Create a new Post object to insert into the database
+                val post = Posts(
+                    photoFileName = name,
+                    date = Date(),
+                    owner = "User",
+                    image = imageByteArray // Save the image byte array
+                )
+
+                // Insert the post into the database
+                val postId = postsDao.insertPost(post)
+                if (postId > 0) {
+                    // Successfully inserted the post, the ID is greater than 0
+                    println("Post inserted successfully with ID: $postId")
+                } else {
+                    // Insertion failed
+                    println("Failed to insert post.")
+                }
             }
 
             override fun onError(exception: ImageCaptureException) {
