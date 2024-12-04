@@ -2,6 +2,7 @@ package com.bignerdranch.android.realtime
 
 import android.content.pm.PackageManager
 import android.Manifest;
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -47,9 +48,20 @@ import database.AppDatabase
 import kotlinx.coroutines.launch
 import java.util.Date
 import com.bignerdranch.android.realtime.LoginScreen as LoginScreen
+import android.os.Build
+import androidx.core.app.ActivityCompat
+import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.content.Context
+import android.content.Intent
+import java.util.Calendar
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
+
+import androidx.core.app.NotificationCompat
 
 class MainActivity : ComponentActivity() {
-
     private val cameraPermissionRequest =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
@@ -60,8 +72,31 @@ class MainActivity : ComponentActivity() {
 
         }
 
+    @SuppressLint("ScheduleExactAlarm")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        createNotificationChannel()
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 18) // SET STATIC TIME HERE in military hours
+            set(Calendar.MINUTE, 28)
+            set(Calendar.SECOND, 0)
+        }
+
+        val intent = Intent(this, NotificationReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
+        )
+
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            pendingIntent
+        )
         enableEdgeToEdge()
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
@@ -119,6 +154,19 @@ class MainActivity : ComponentActivity() {
 
     }
 
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Notification Channel Name"
+            val descriptionText = "Channel Description"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel("channel_id", name, importance).apply {
+                description = descriptionText
+            }
+
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
 //    private fun setCameraPreview() {
 //        setContent {
 //            CameraPreviewScreen()
@@ -129,7 +177,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit){
     var username by remember {mutableStateOf("")}
-    var password by remember {mutableStateOf("")}
     val context = LocalContext.current.applicationContext
 
     Column(modifier = Modifier
@@ -149,23 +196,12 @@ fun LoginScreen(onLoginSuccess: () -> Unit){
                 .padding(bottom = 8.dp)
         )
 
-        OutlinedTextField(value = password, onValueChange = {password = it},
-            label = {Text(text = "Password")},
-            shape = RoundedCornerShape(20.dp),
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Lock, contentDescription = "Password")
-            },
-            modifier = Modifier.fillMaxWidth()
-                .padding(bottom = 8.dp),
-            visualTransformation = PasswordVisualTransformation()
-        )
-
         Button(onClick = {
-            if(authenticate(username, password)){
+            if(authenticate(username)){
                 onLoginSuccess()
-                Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT)
+                Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
             }else{
-                Toast.makeText(context, "Incorrect username and/or password", Toast.LENGTH_SHORT)
+                Toast.makeText(context, "Incorrect username and/or password", Toast.LENGTH_SHORT).show()
             }
         }, contentPadding = PaddingValues(start = 60.dp, end = 60.dp, top = 8.dp, bottom = 8.dp),
             modifier = Modifier.padding(top = 18.dp)
@@ -175,12 +211,29 @@ fun LoginScreen(onLoginSuccess: () -> Unit){
     }
 }
 
-private fun authenticate(username: String, password: String): Boolean {
-    val validUsername = "TestUser"
-    val validPassword = ":3"
-    return (username == validUsername) && (password == validPassword)
-}
+private fun authenticate(username: String): Boolean {
+    //val validUsername = "TestUser"
+    //return (username == validUsername)
+    return true
 
+    /*
+    val database by lazy { AppDatabase.getDatabase(this) }
+    val userRepository by lazy { UsersRepository(database.usersDao()) }
+    val returnedUser: Users = userRepository.getUser(username)
+    if (returnedUser != null) {
+        Log.d("user", returnedUser.toString())
+        return true
+    } else {
+        val user = Users(
+            username = username,
+            password = "1234"
+        )
+        userRepository.insertUser(user)
+        Log.d("created", "User created")
+        return true
+    }
+    */
+}
 
 @Composable
 fun NavGraph(navController: NavHostController){
@@ -201,8 +254,8 @@ fun NavGraph(navController: NavHostController){
             CameraPreviewScreen(navController)
         }
     }
-
 }
+
 
 
 
