@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -12,6 +13,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,15 +22,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
+import com.bignerdranch.android.realtime.Posts
+import database.AppDatabase
+import java.util.Date
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 @Composable
+
 fun CameraPreviewScreen(navController: NavHostController) {
+
     val lensFacing = CameraSelector.LENS_FACING_BACK
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -48,13 +56,23 @@ fun CameraPreviewScreen(navController: NavHostController) {
     }
     Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
         AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
-        Button(onClick = { captureImage(imageCapture, context) }) {
+
+        // Capture image button
+        Button(
+            onClick = { captureImage(imageCapture, context) },
+            modifier = Modifier.padding(bottom = 80.dp)
+        ) {
             Text(text = "Capture Image")
         }
-        Button(onClick = {
-            navController.navigate("camera") // Navigate to the Camera Screen
-        }) {
-            Text(text = "Open Camera")
+
+        // Second button for returning to home page
+        Button(
+            onClick = {
+                navController.navigate("home") // Navigate to the Camera Screen
+            },
+            modifier = Modifier.padding(bottom = 40.dp) // Add padding to position below the first button
+        ) {
+            Text(text = "Home")
         }
     }
 }
@@ -80,7 +98,33 @@ private fun captureImage(imageCapture: ImageCapture, context: Context) {
         ContextCompat.getMainExecutor(context),
         object : ImageCapture.OnImageSavedCallback {
             override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                println("Successs")
+                println("Success")
+                val uri = outputFileResults.savedUri
+                println("Image saved at: $uri")
+
+                val imageByteArray = context.contentResolver.openInputStream(uri!!)?.use { it.readBytes() }
+
+                // Save image data to database (Assuming you're saving it in Posts table)
+                val appDatabase = AppDatabase.getDatabase(context)
+                val postsDao = appDatabase.postsDao()
+
+                // Create a new Post object to insert into the database
+                val post = Posts(
+                    photoFileName = name,
+                    date = Date(),
+                    owner = "User",
+                    image = imageByteArray // Save the image byte array
+                )
+
+                // Insert the post into the database
+                val postId = postsDao.insertPost(post)
+                if (postId > 0) {
+                    // Successfully inserted the post, the ID is greater than 0
+                    println("Post inserted successfully with ID: $postId")
+                } else {
+                    // Insertion failed
+                    println("Failed to insert post.")
+                }
             }
 
             override fun onError(exception: ImageCaptureException) {
