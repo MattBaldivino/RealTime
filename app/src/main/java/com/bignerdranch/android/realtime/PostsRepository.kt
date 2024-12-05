@@ -8,7 +8,7 @@ class PostsRepository(private val postsDao: PostsDao) {
     }
 
     //if List does not show all posts, try using Flow
-    suspend fun getPosts(date: Date): List<Posts> {
+    suspend fun getPosts(date: Int): List<Posts> {
         return postsDao.getPosts(date)
     }
 

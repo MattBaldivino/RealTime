@@ -13,7 +13,7 @@ interface PostsDao {
     //get posts by date
     //can use this to display all posts from the current day
     @Query("SELECT * FROM posts WHERE date LIKE :date")
-    fun getPosts(date: Date): List<Posts>
+    fun getPosts(date: Int): List<Posts>
 
     //deleting all posts
     @Query("DELETE FROM Posts")

@@ -1,5 +1,6 @@
 package com.bignerdranch.android.realtime
 
+import UserFeed
 import android.content.pm.PackageManager
 import android.Manifest;
 import android.annotation.SuppressLint
@@ -128,28 +129,8 @@ class MainActivity : ComponentActivity() {
         val userRepository by lazy { UsersRepository(database.usersDao()) }
         val postRepository by lazy { PostsRepository(database.postsDao())}
 
-        val user = Users(
-            username = "JaneDoe",
-            password = "1234"
-        )
-
-        val dummyDate = Date()
-        val post = Posts(
-            //dummyphoto doesn't exist, it's just a string placeholder
-            photoFileName = "dummyphoto.png",
-            date = dummyDate,
-            owner = "JaneDoe"
-        )
-
         lifecycleScope.launch {
-            userRepository.insertUser(user)
-            val returnedUser: Users = userRepository.getUser("JaneDoe")
-            Log.d("user", returnedUser.toString())
-
-            postRepository.insertPost(post)
-            val returnedPosts = postRepository.getPosts(dummyDate)
-            Log.d("post", returnedPosts.joinToString())
-
+            postRepository.deleteAll()
         }
 
     }
@@ -248,6 +229,10 @@ fun NavGraph(navController: NavHostController){
 
         composable("home"){
             HomeScreen(navController)
+        }
+
+        composable("feed"){
+            UserFeed(navController)
         }
 
         composable("camera") {
