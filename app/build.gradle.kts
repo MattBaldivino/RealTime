@@ -63,6 +63,7 @@ dependencies {
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-alpha02")
+    implementation("androidx.compose.material:material-icons-extended:1.5.0")
 
     implementation ("androidx.camera:camera-camera2:1.4.0")
     implementation ("androidx.camera:camera-lifecycle:1.4.0")
