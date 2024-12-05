@@ -25,9 +25,14 @@ fun HomeScreen(navController: NavHostController){
             Text(text = "Home")
 
                 Button(onClick = {
-                    navController.navigate("camera") // Navigate to the Camera Screen
+                    navController.navigate("camera") // Navigate to the Feed
                 }) {
                     Text(text = "Open Camera")
+                }
+                Button(onClick = {
+                    navController.navigate("feed") // Navigate to the Camera Screen
+                }) {
+                    Text(text = "Open Feed")
                 }
         }
     }

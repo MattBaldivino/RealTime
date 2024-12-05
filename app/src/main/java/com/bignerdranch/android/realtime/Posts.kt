@@ -8,7 +8,7 @@ data class Posts (
     @PrimaryKey (autoGenerate = true)
     val id:Long=0,
     val photoFileName: String? = null,
-    val date: Date,
+    val date: Int,
     val owner: String? = null,
     val image: ByteArray? = null
 )

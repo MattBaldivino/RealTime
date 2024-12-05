@@ -111,7 +111,7 @@ private fun captureImage(imageCapture: ImageCapture, context: Context) {
                 // Create a new Post object to insert into the database
                 val post = Posts(
                     photoFileName = name,
-                    date = Date(),
+                    date = Date().date,
                     owner = "User",
                     image = imageByteArray // Save the image byte array
                 )
