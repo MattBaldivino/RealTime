@@ -11,15 +11,29 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Camera
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.FlipCameraAndroid
+import androidx.compose.material.icons.filled.FlipCameraIos
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -37,7 +51,8 @@ import kotlin.coroutines.suspendCoroutine
 
 fun CameraPreviewScreen(navController: NavHostController) {
 
-    val lensFacing = CameraSelector.LENS_FACING_BACK
+    //val lensFacing = CameraSelector.LENS_FACING_BACK
+    var lensFacing by remember { mutableStateOf(CameraSelector.LENS_FACING_BACK) }
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val preview = Preview.Builder().build()
@@ -57,12 +72,45 @@ fun CameraPreviewScreen(navController: NavHostController) {
     Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
         AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
 
-        // Capture image button
-        Button(
-            onClick = { captureImage(imageCapture, context) },
-            modifier = Modifier.padding(bottom = 80.dp)
+
+        //Toggle camera button
+        IconButton(
+            onClick = {
+                lensFacing = if (lensFacing == CameraSelector.LENS_FACING_BACK) {
+                    CameraSelector.LENS_FACING_FRONT
+                } else {
+                    CameraSelector.LENS_FACING_BACK
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
         ) {
-            Text(text = "Capture Image")
+            val icon = if (lensFacing == CameraSelector.LENS_FACING_BACK) {
+                Icons.Filled.FlipCameraAndroid
+            } else {
+                Icons.Filled.FlipCameraAndroid
+            }
+            Icon(
+                imageVector = icon,
+                contentDescription = "Toggle Camera",
+                modifier = Modifier.size(32.dp)
+            )
+        }
+
+
+        //Button to capture image
+        IconButton(
+            onClick = { captureImage(imageCapture, context) },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 80.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.PhotoCamera,
+                contentDescription = "Capture Image",
+                modifier = Modifier.size(64.dp)
+            )
         }
 
         // Second button for returning to home page
@@ -70,7 +118,7 @@ fun CameraPreviewScreen(navController: NavHostController) {
             onClick = {
                 navController.navigate("home") // Navigate to the Camera Screen
             },
-            modifier = Modifier.padding(bottom = 40.dp) // Add padding to position below the first button
+            modifier = Modifier.padding(bottom = 30.dp) // Add padding to position below the first button
         ) {
             Text(text = "Home")
         }
