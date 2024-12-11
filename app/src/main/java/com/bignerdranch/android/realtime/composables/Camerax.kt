@@ -11,17 +11,12 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Camera
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.FlipCameraAndroid
-import androidx.compose.material.icons.filled.FlipCameraIos
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -29,11 +24,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -41,6 +31,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
+import com.bignerdranch.android.realtime.FeedBoolean
 import com.bignerdranch.android.realtime.PassUser
 import com.bignerdranch.android.realtime.Posts
 import database.AppDatabase
@@ -172,6 +163,13 @@ private fun captureImage(imageCapture: ImageCapture, context: Context) {
                 val postId = postsDao.insertPost(post)
                 if (postId > 0) {
                     // Successfully inserted the post, the ID is greater than 0
+                    var isPictureTaken = FeedBoolean.getBoolean(context)
+                    Log.d("FeedBoolean", "isPictureTaken: $isPictureTaken")
+
+                    FeedBoolean.setBoolean(context, true) // set boolean to true for access to feed
+                    isPictureTaken = FeedBoolean.getBoolean(context)
+                    Log.d("FeedBoolean", "isPictureTaken: $isPictureTaken")
+
                     println("Post inserted successfully with ID: $postId")
                 } else {
                     // Insertion failed
