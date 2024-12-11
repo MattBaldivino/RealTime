@@ -41,6 +41,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
+import com.bignerdranch.android.realtime.PassUser
 import com.bignerdranch.android.realtime.Posts
 import database.AppDatabase
 import java.util.Date
@@ -126,6 +127,9 @@ fun CameraPreviewScreen(navController: NavHostController) {
 }
 
 private fun captureImage(imageCapture: ImageCapture, context: Context) {
+    /*if (username != null) {
+        Log.d("user: ", username)
+    }*/
     val name = "CameraxImage.jpeg"
     val contentValues = ContentValues().apply {
         put(MediaStore.MediaColumns.DISPLAY_NAME, name)
@@ -160,7 +164,7 @@ private fun captureImage(imageCapture: ImageCapture, context: Context) {
                 val post = Posts(
                     photoFileName = name,
                     date = Date().date,
-                    owner = "User",
+                    owner = PassUser.username,
                     image = imageByteArray // Save the image byte array
                 )
 

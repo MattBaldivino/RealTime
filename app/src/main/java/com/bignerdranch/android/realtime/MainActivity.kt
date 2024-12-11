@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -34,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -47,10 +45,8 @@ import com.bignerdranch.android.realtime.composables.CameraPreviewScreen
 import com.bignerdranch.android.realtime.ui.theme.RealTimeTheme
 import database.AppDatabase
 import kotlinx.coroutines.launch
-import java.util.Date
 import com.bignerdranch.android.realtime.LoginScreen as LoginScreen
 import android.os.Build
-import androidx.core.app.ActivityCompat
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.content.Context
@@ -58,9 +54,13 @@ import android.content.Intent
 import java.util.Calendar
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
 
-import androidx.core.app.NotificationCompat
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+
+object PassUser{
+    var username = ""
+}
 
 class MainActivity : ComponentActivity() {
     private val cameraPermissionRequest =
@@ -130,7 +130,7 @@ class MainActivity : ComponentActivity() {
         val postRepository by lazy { PostsRepository(database.postsDao())}
 
         lifecycleScope.launch {
-            postRepository.deleteAll()
+            //postRepository.deleteAll()
         }
 
     }
@@ -178,7 +178,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit){
         )
 
         Button(onClick = {
-            if(authenticate(username)){
+            if(authenticate(username, context)){
                 onLoginSuccess()
                 Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
             }else{
@@ -192,28 +192,24 @@ fun LoginScreen(onLoginSuccess: () -> Unit){
     }
 }
 
-private fun authenticate(username: String): Boolean {
-    //val validUsername = "TestUser"
-    //return (username == validUsername)
-    return true
-
-    /*
-    val database by lazy { AppDatabase.getDatabase(this) }
-    val userRepository by lazy { UsersRepository(database.usersDao()) }
-    val returnedUser: Users = userRepository.getUser(username)
-    if (returnedUser != null) {
-        Log.d("user", returnedUser.toString())
-        return true
-    } else {
-        val user = Users(
+private fun authenticate(username: String, context: Context): Boolean {
+    val appDatabase = AppDatabase.getDatabase(context)
+    val usersDao = appDatabase.usersDao()
+    if(usersDao.getUserDataDetails(username) == null){
+        val newUser = Users(
             username = username,
-            password = "1234"
+            password = ""
         )
-        userRepository.insertUser(user)
-        Log.d("created", "User created")
+        usersDao.insertUser(newUser)
+        Log.d("user created", usersDao.getUserDataDetails(username).toString())
+        PassUser.username = username
+        Log.d("current user", PassUser.username)
+        return true
+    }else{
+        Log.d("user found", usersDao.getUserDataDetails(username).toString())
+        PassUser.username = username
         return true
     }
-    */
 }
 
 @Composable

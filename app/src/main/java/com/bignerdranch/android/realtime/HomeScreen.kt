@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
+import com.bignerdranch.android.realtime.ui.theme.Purple40
 
 @Composable
 fun HomeScreen(navController: NavHostController){
@@ -24,15 +25,18 @@ fun HomeScreen(navController: NavHostController){
             {
             Text(text = "Home")
 
-                Button(onClick = {
+                Button(
+                    onClick = {
                     navController.navigate("camera") // Navigate to the Feed
                 }) {
                     Text(text = "Open Camera")
+                    Modifier.background(color = Purple40)
                 }
                 Button(onClick = {
                     navController.navigate("feed") // Navigate to the Camera Screen
                 }) {
                     Text(text = "Open Feed")
+                    Modifier.background(color = Purple40)
                 }
         }
     }
