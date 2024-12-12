@@ -1,5 +1,6 @@
 package com.bignerdranch.android.realtime
 
+import HiddenFeed
 import UserFeed
 import android.content.pm.PackageManager
 import android.Manifest;
@@ -230,6 +231,10 @@ fun NavGraph(navController: NavHostController){
 
         composable("feed"){
             UserFeed(navController)
+        }
+
+        composable("hiddenFeed"){
+            HiddenFeed(navController)
         }
 
         composable("camera") {

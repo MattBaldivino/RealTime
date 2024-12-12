@@ -4,35 +4,21 @@ import android.graphics.BitmapFactory
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.navigation.NavHostController
 import database.AppDatabase
 import java.util.Date
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,6 +31,11 @@ import com.bignerdranch.android.realtime.ui.theme.Purple40
 @Composable
 fun UserFeed (navController: NavHostController) {
     LazyCol(navController)
+}
+
+@Composable
+fun HiddenFeed(navController: NavHostController){
+    HiddenContent(navController)
 }
 
 fun getUserInfo(context: Context): List<Posts> {
@@ -78,6 +69,13 @@ fun UserPost(owner: String){
         fontWeight = FontWeight.Bold)
 }
 
+@Composable
+fun HiddenMessage(){
+    Text(text = "Photo has not been taken for today! Please take photo to see other users' photos!",
+        fontSize = 30.sp,
+        modifier = Modifier.padding(100.dp))
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LazyCol(navController: NavHostController){
@@ -106,4 +104,30 @@ fun LazyCol(navController: NavHostController){
             currentImage?.let { BitmapImage(it) }
         })
     })
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun HiddenContent(navController: NavHostController){
+    LazyColumn(content = {
+        stickyHeader {
+            Row( modifier = Modifier
+                .background(color = Purple40)
+                .padding(bottom = 20.dp)
+                .fillMaxWidth(),
+                content = {
+                    IconButton(
+                        onClick = {navController.navigate("home") },
+                        modifier = Modifier.padding(top = 35.dp)
+                    ) {
+                        Icon(painter = painterResource(R.drawable.backarrow_foreground),
+                            contentDescription = "homeButton")
+                    }
+                })
+        }
+        item{
+            HiddenMessage()
+        }
+    }
+    )
 }
