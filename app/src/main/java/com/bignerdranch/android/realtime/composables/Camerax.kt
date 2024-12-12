@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -93,7 +94,7 @@ fun CameraPreviewScreen(navController: NavHostController) {
 
         //Button to capture image
         IconButton(
-            onClick = { captureImage(imageCapture, context) },
+            onClick = { captureImage(imageCapture, context, navController) },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 80.dp)
@@ -108,7 +109,7 @@ fun CameraPreviewScreen(navController: NavHostController) {
         // Second button for returning to home page
         Button(
             onClick = {
-                navController.navigate("home") // Navigate to the Camera Screen
+                navController.navigate("home")
             },
             modifier = Modifier.padding(bottom = 30.dp) // Add padding to position below the first button
         ) {
@@ -117,7 +118,7 @@ fun CameraPreviewScreen(navController: NavHostController) {
     }
 }
 
-private fun captureImage(imageCapture: ImageCapture, context: Context) {
+private fun captureImage(imageCapture: ImageCapture, context: Context, navController: NavHostController) {
     /*if (username != null) {
         Log.d("user: ", username)
     }*/
@@ -171,6 +172,8 @@ private fun captureImage(imageCapture: ImageCapture, context: Context) {
                     Log.d("FeedBoolean", "isPictureTaken: $isPictureTaken")
 
                     println("Post inserted successfully with ID: $postId")
+                    Toast.makeText(context, "Post Successful", Toast.LENGTH_SHORT).show()
+                    navController.navigate("home")
                 } else {
                     // Insertion failed
                     println("Failed to insert post.")
