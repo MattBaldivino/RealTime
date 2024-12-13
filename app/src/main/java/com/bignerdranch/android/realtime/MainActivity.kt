@@ -55,9 +55,11 @@ import android.content.Intent
 import java.util.Calendar
 import android.app.NotificationManager
 import android.app.PendingIntent
-
+import android.provider.Settings
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import kotlin.random.Random
+
 
 object PassUser{
     var username = ""
@@ -77,13 +79,16 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("ScheduleExactAlarm")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        checkAndRequestNotificationPermission()
+        checkAndRequestExactAlarmPermission()
         createNotificationChannel()
+
         FeedBoolean.resetBooleanIfNewDay(this) // boolean value that should be used for feed
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 18) // SET STATIC TIME HERE in military hours
-            set(Calendar.MINUTE, 28)
+            set(Calendar.HOUR_OF_DAY, Random.nextInt(7, 19)) // random time from 7 am to 7pm
+            set(Calendar.MINUTE, Random.nextInt(0, 59))  // Generates a random integer between 1 and 99
             set(Calendar.SECOND, 0)
         }
 
@@ -100,6 +105,7 @@ class MainActivity : ComponentActivity() {
             calendar.timeInMillis,
             pendingIntent
         )
+
         enableEdgeToEdge()
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
@@ -150,11 +156,43 @@ class MainActivity : ComponentActivity() {
             notificationManager.createNotificationChannel(channel)
         }
     }
-//    private fun setCameraPreview() {
-//        setContent {
-//            CameraPreviewScreen()
-//        }
-//    }
+
+    private fun checkAndRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    private val requestNotificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Toast.makeText(this, "Notification Permission Granted", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Notification Permission Denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun checkAndRequestExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                Toast.makeText(
+                    this, "Please grant exact alarm permission in Settings", Toast.LENGTH_LONG
+                ).show()
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                    startActivity(intent)
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -242,6 +280,8 @@ fun NavGraph(navController: NavHostController){
         }
     }
 }
+
+
 
 
 

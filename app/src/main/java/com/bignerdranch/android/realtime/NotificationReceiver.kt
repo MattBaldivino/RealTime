@@ -21,10 +21,7 @@ class NotificationReceiver : BroadcastReceiver() {
             .setSmallIcon(R.drawable.ic_notification) // Replace with  app icon
             .setContentTitle("! RealTime !")
             .setContentText("5 minutes to catch up with friends in RealTime!")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
             .build()
 
         val notificationManager =
